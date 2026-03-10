@@ -1,0 +1,72 @@
+### 1. CEK DAFTAR MENU (READ)
+GET http://localhost:8080/api/menu
+
+
+###
+
+
+### 2. TAMBAH MENU BARU (CREATE)
+POST http://localhost:8080/api/menu
+Content-Type: application/json
+
+{
+  "nama": "Rendang Daging Spesial",
+  "harga": 35000,
+  "deskripsi": "Rendang daging sapi empuk dengan bumbu rahasia Bundo.",
+  "gambarurl": "rendang.jpg"
+}
+
+
+###
+
+
+### 3. TAMBAH MENU KEDUA
+POST http://localhost:8080/api/menu
+Content-Type: application/json
+
+{
+  "nama": "Ayam Pop Bundo",
+  "harga": 25000,
+  "deskripsi": "Ayam pop gurih disajikan dengan sambal merah khas.",
+  "gambarurl": "ayampop.jpg"
+}
+
+### 4. REGISTER AKUN BARU
+POST http://localhost:8080/api/register
+Content-Type: application/json
+
+{
+  "nama": "Yusuf",
+  "email": "yusuffahmad1128@email.com",
+  "password": "rahasia123"
+}
+
+### 5. LOGIN AKUN
+POST http://localhost:8080/api/login
+Content-Type: application/json
+
+{
+  "email": "yusuffahmad1128@email.com",
+  "password": "rahasia123"
+}
+
+### 6. REGISTER EMAIL ASLI UNTUK TESTING
+POST http://localhost:8080/api/register
+Content-Type: application/json
+
+{
+  "nama": "yusuf",
+  "email": "yusuffahmad1128@gmail.com", 
+  "password": "passwordadmin"
+}
+
+### 7. LUPA PASSWORD
+POST http://localhost:8080/api/lupa-password
+Content-Type: application/json
+
+{
+  "email": "yusuffahmad1128@gmail.com"
+}
+
+### LIHAT SEMUA USER DI DATABASE
+GET http://localhost:8080/api/users
