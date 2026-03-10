@@ -1,33 +1,38 @@
 package main
 
 import (
+	"log"
 	"time"
+
 	"amdaaybackend/controllers"
 	"amdaaybackend/models"
-	"log"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	models.ConnectDatabase()
-
-err := godotenv.Load()
+	// 1. BACA KUNCI RAHASIA DARI .ENV DULU
+	err := godotenv.Load()
 	if err != nil {
 		log.Println("Peringatan: File .env tidak ditemukan, menggunakan nilai bawaan.")
 	}
 
+	// 2. SETELAH KUNCI TERBACA, BARU SAMBUNGKAN KE DATABASE
+	models.ConnectDatabase()
+
+	// 3. JALANKAN MESIN ROUTER
 	r := gin.Default()
 
-    r.Use(cors.New(cors.Config{
-        AllowOriginFunc:  func(origin string) bool { return true },
-        AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-        MaxAge:           12 * time.Hour,
-    }))
+	r.Use(cors.New(cors.Config{
+		AllowOriginFunc:  func(origin string) bool { return true },
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	r.Static("/uploads", "./uploads")
 	r.GET("/api/menu", controllers.GetMenus)
@@ -43,7 +48,7 @@ err := godotenv.Load()
 	r.POST("/api/menu/:id", controllers.CekAdmin(), controllers.UpdateMenu)
 	r.DELETE("/api/menu/:id", controllers.CekAdmin(), controllers.DeleteMenu)
 	r.PUT("/api/menu/:id/toggle", controllers.CekAdmin(), controllers.ToggleMenuStatus)
-	r.GET("/api/users", controllers.CekAdmin(), controllers.GetUsers) 
+	r.GET("/api/users", controllers.CekAdmin(), controllers.GetUsers)
 	r.PUT("/api/users/:id", controllers.CekAdmin(), controllers.UpdateUserByAdmin)
 	r.DELETE("/api/users/:id", controllers.CekAdmin(), controllers.DeleteUser)
 

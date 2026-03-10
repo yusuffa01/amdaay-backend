@@ -1,20 +1,37 @@
 package models
 
 import (
-	"github.com/glebarez/sqlite"
+	"fmt"
+	"log"
+	"os"
+
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	database, err := gorm.Open(sqlite.Open("amdaay.db"), &gorm.Config{})
+	// 1. Mengambil kunci rahasia dari brankas .env
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASS")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
 
+	// 2. Merakit kunci menjadi satu kalimat akses
+	// Penting: TiDB Serverless mewajibkan tambahan 'tls=true' di ujungnya
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&tls=true", dbUser, dbPass, dbHost, dbPort, dbName)
+
+	// 3. Membuka pintu brankas awan
+	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("Gagal terhubung ke database! Detail: " + err.Error())
+		log.Fatal("Gagal terhubung ke database TiDB! Detail: ", err)
 	}
 
+	// 4. Menyiapkan laci-laci tabel secara otomatis
 	database.AutoMigrate(&Menu{}, &User{}, &FotoProduk{})
 
 	DB = database
+	fmt.Println("🚀 BERHASIL TERSAMBUNG KE BRANKAS BAJA TiDB!")
 }
