@@ -8,8 +8,10 @@ import (
 	"os"
 	"strings"
 	"time"
+
 	"amdaaybackend/models"
 	"amdaaybackend/utils"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -18,7 +20,7 @@ import (
 func getKunciRahasia() []byte {
 	rahasia := os.Getenv("JWT_SECRET")
 	if rahasia == "" {
-		rahasia = "kunci_cadangan_sementara" 
+		rahasia = "kunci_cadangan_sementara"
 	}
 	return []byte(rahasia)
 }
@@ -98,7 +100,7 @@ func LupaPassword(c *gin.Context) {
 	b := make([]byte, 16)
 	rand.Read(b)
 	tokenUnik := hex.EncodeToString(b)
-	expiredAt := time.Now().Unix() + 300 
+	expiredAt := time.Now().Unix() + 300
 
 	models.DB.Model(&user).Updates(models.User{
 		TokenReset:   tokenUnik,
@@ -156,10 +158,13 @@ func GetUsers(c *gin.Context) {
 func GetProfile(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	var user models.User
-	if err := models.DB.Where("id = ?", userID).First(&user).Error; err != nil {if err := models.DB.First(&user, userID).Error; err != nil {
+	
+	// FIX: Pencarian UUID yang benar
+	if err := models.DB.Where("id = ?", userID).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
 		return
 	}
+	
 	c.JSON(http.StatusOK, gin.H{
 		"id":    user.ID,
 		"nama":  user.Nama,
@@ -177,11 +182,14 @@ func UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Data tidak valid"})
 		return
 	}
+	
 	var user models.User
-	if err := models.DB.Where("id = ?", userID).First(&user).Error; err != nil { {
+	// FIX: Pencarian UUID yang benar & kurung diperbaiki
+	if err := models.DB.Where("id = ?", userID).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
 		return
 	}
+	
 	models.DB.Model(&user).Updates(models.User{
 		Nama:  input.Nama,
 		Email: input.Email,
@@ -199,25 +207,29 @@ func UbahPassword(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Data tidak valid"})
 		return
 	}
+	
 	var user models.User
+	// FIX: Pencarian UUID yang benar
 	if err := models.DB.Where("id = ?", userID).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Data user tidak ditemukan"})
 		return
 	}
+	
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.PasswordLama)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Password lama salah!"})
 		return
 	}
+	
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(input.PasswordBaru), bcrypt.DefaultCost)
 	models.DB.Model(&user).Update("Password", string(hashedPassword))
 	c.JSON(http.StatusOK, gin.H{"pesan": "Password berhasil diubah!"})
 }
 
-
 func DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 	userIDLagiLogin, _ := c.Get("user_id")
 	myID := fmt.Sprintf("%v", userIDLagiLogin)
+	
 	if myID == id {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Anda tidak bisa menghapus akun Anda sendiri!"})
 		return
@@ -323,7 +335,7 @@ func CekAdmin() gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-            
+
 			c.Set("user_id", claims["user_id"])
 			c.Set("role", role)
 			c.Next()
