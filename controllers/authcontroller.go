@@ -156,7 +156,7 @@ func GetUsers(c *gin.Context) {
 func GetProfile(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	var user models.User
-	if err := models.DB.First(&user, userID).Error; err != nil {
+	if err := models.DB.Where("id = ?", userID).First(&user).Error; err != nil {if err := models.DB.First(&user, userID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
 		return
 	}
@@ -178,7 +178,7 @@ func UpdateProfile(c *gin.Context) {
 		return
 	}
 	var user models.User
-	if err := models.DB.First(&user, userID).Error; err != nil {
+	if err := models.DB.Where("id = ?", userID).First(&user).Error; err != nil { {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
 		return
 	}
