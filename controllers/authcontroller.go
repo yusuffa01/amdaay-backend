@@ -107,9 +107,13 @@ func LupaPassword(c *gin.Context) {
 		ExpiredReset: expiredAt,
 	})
 
-	resetLink := "https://LINK_VERCEL_BUNDO_DISINI/reset-password/" + tokenUnik
+	resetLink := "https://AMDAAY_FRONTEND_VERCEL.vercel.app/reset-password/" + tokenUnik
+	
 	err := utils.KirimEmailReset(user.Email, resetLink)
 	if err != nil {
+		fmt.Println("❌ GAGAL KIRIM EMAIL KE:", user.Email)
+		fmt.Println("🔍 ALASAN ERROR ASLI:", err)
+		
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengirim email"})
 		return
 	}
