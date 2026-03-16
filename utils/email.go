@@ -2,13 +2,17 @@ package utils
 
 import (
 	"crypto/tls"
+	"os"
 	"gopkg.in/gomail.v2"
 )
 
 func KirimEmailReset(tujuanEmail string, resetLink string) error {
 	m := gomail.NewMessage()
 
-	m.SetHeader("From", "mandayusuf2728@gmail.com")
+	emailPengirim := os.Getenv("SMTP_EMAIL")
+	passwordPengirim := os.Getenv("SMTP_PASSWORD")
+
+	m.SetHeader("From", emailPengirim)
 	m.SetHeader("To", tujuanEmail)
 	m.SetHeader("Subject", "Reset Password - website resmi amdaay.scarf")
 
@@ -33,7 +37,7 @@ func KirimEmailReset(tujuanEmail string, resetLink string) error {
 
 	m.SetBody("text/html", pesanHTML)
 
-	dialer := gomail.NewDialer("smtp.gmail.com", 465, "mandayusuf2728@gmail.com", "tipbyxuusbrrmzwu")
+	dialer := gomail.NewDialer("smtp.gmail.com", 587, emailPengirim, passwordPengirim)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	return dialer.DialAndSend(m)

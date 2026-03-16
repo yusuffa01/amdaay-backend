@@ -107,7 +107,7 @@ func LupaPassword(c *gin.Context) {
 		ExpiredReset: expiredAt,
 	})
 
-	resetLink := "http://localhost:5173/reset-password/" + tokenUnik
+	resetLink := "https://LINK_VERCEL_BUNDO_DISINI/reset-password/" + tokenUnik
 	err := utils.KirimEmailReset(user.Email, resetLink)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal mengirim email"})
