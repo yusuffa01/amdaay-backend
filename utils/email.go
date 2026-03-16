@@ -1,20 +1,23 @@
 package utils
 
 import (
-	"crypto/tls"
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
 	"os"
-	"gopkg.in/gomail.v2"
 )
 
 func KirimEmailReset(tujuanEmail string, resetLink string) error {
-	m := gomail.NewMessage()
+	// 1. Ambil Kunci Brevo dari Satpam Render
+	apiKey := os.Getenv("BREVO_API_KEY")
+	if apiKey == "" {
+		return errors.New("Kunci BREVO_API_KEY belum dipasang di Render")
+	}
 
-	emailPengirim := os.Getenv("SMTP_EMAIL")
-	passwordPengirim := os.Getenv("SMTP_PASSWORD")
-
-	m.SetHeader("From", emailPengirim)
-	m.SetHeader("To", tujuanEmail)
-	m.SetHeader("Subject", "Reset Password - website resmi amdaay.scarf")
+	url := "https://api.brevo.com/v3/smtp/email"
 
 	pesanHTML := `
 		<div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 2px solid #ffedd5; border-radius: 10px;">
@@ -35,12 +38,42 @@ func KirimEmailReset(tujuanEmail string, resetLink string) error {
 		</div>
 	`
 
-	m.SetBody("text/html", pesanHTML)
+	// 2. Membungkus Paket Surat untuk Brevo
+	payloadData := map[string]interface{}{
+		"sender": map[string]string{
+			"name":  "Admin Amdaay.Scarf",
+			"email": "mandayusuf2728@gmail.com", // Menggunakan email Bundo sebagai pengirim
+		},
+		"to": []map[string]string{
+			{
+				"email": tujuanEmail,
+			},
+		},
+		"subject":     "Reset Password - website resmi amdaay.scarf",
+		"htmlContent": pesanHTML,
+	}
 
-	dialer := gomail.NewDialer("smtp.gmail.com", 587, emailPengirim, passwordPengirim)
-	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	payloadBytes, _ := json.Marshal(payloadData)
 
-	return dialer.DialAndSend(m)
+	// 3. Mengirim Paket Lewat Jalur Utama (HTTP / Port 443)
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(payloadBytes))
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("api-key", apiKey)
+	req.Header.Add("content-type", "application/json")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 201 && res.StatusCode != 200 {
+		bodyBytes, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("Ditolak Brevo! Status: %d, Balasan: %s", res.StatusCode, string(bodyBytes))
+	}
+
+	return nil
 }
 
 //kode untuk local testing
