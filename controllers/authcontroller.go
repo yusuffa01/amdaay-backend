@@ -107,7 +107,7 @@ func LupaPassword(c *gin.Context) {
 		ExpiredReset: expiredAt,
 	})
 
-	resetLink := "https://AMDAAY_FRONTEND_VERCEL.vercel.app/reset-password/" + tokenUnik
+	resetLink := "https://amdaay-frontend.vercel.app/reset-password/" + tokenUnik
 	
 	err := utils.KirimEmailReset(user.Email, resetLink)
 	if err != nil {
