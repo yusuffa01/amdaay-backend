@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"amdaaybackend/controllers"
+	"amdaaybackend/middlewares" // 👇 1. KITA PANGGIL ALAMAT POS SATPAMNYA DI SINI
 	"amdaaybackend/models"
 
 	"github.com/gin-contrib/cors"
@@ -33,6 +34,9 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
+
+	// 👇 2. SURUH SATPAM ANTI-SPAM BERJAGA DI PINTU DEPAN
+	r.Use(middlewares.RateLimiter())
 
 	r.Static("/uploads", "./uploads")
 	r.GET("/api/menu", controllers.GetMenus)
